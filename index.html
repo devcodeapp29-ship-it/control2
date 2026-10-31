@@ -3,1514 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control y Gestión de Acólitos (Supabase Cloud)</title>
-    <!-- Tailwind CSS -->
+    <title>Sistema de Gestión de Monaguillos</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    </style>
+    <!-- FontAwesome para Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-12 font-sans">
 
-    <!-- Header Principal Unificado y Totalmente Adaptable -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row items-center justify-between py-3 gap-3">
-                <!-- Marca & Botón Secreto de la Iglesia -->
-                <div class="flex items-center justify-between w-full sm:w-auto gap-3">
-                    <div class="flex items-center gap-3">
-                        <button onclick="promptAdminAccess()" class="bg-amber-500/20 hover:bg-amber-500/40 p-2 sm:p-2.5 rounded-2xl border border-amber-400/30 text-amber-400 shadow-inner transition cursor-pointer group flex items-center justify-center shrink-0" title="Acceso a Modo Administrador">
-                            <i class="fa-solid fa-church text-lg sm:text-xl group-hover:scale-110 transition-transform"></i>
-                        </button>
-                        <div>
-                            <h1 class="text-base sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2 truncate">
-                                Gestión de Acólitos
-                            </h1>
-                            <span id="cloud-status-badge" class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-cloud text-[9px]"></i> Sistema en Línea
-                            </span>
-                        </div>
-                    </div>
-                    <!-- Botón Salir Móvil (Solo visible en admin) -->
-                    <button id="exit-admin-btn-mobile" onclick="setUserMode('visitor')" class="hidden px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold transition items-center gap-1 shadow-md shrink-0">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Salir</span>
-                    </button>
-                </div>
-
-                <!-- Navigation Tabs y Botón de Salir Desktop -->
-                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end overflow-x-auto pb-1 sm:pb-0 custom-scrollbar">
-                    <button onclick="manualSaveData()" class="admin-only hidden px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold transition items-center gap-1.5 shadow-md shrink-0 flex">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                        <span>Guardar Cambios</span>
-                    </button>
-
-                    <button id="exit-admin-btn" onclick="setUserMode('visitor')" class="admin-only hidden px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition items-center gap-1.5 shadow-md shrink-0">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Salir Admin</span>
-                    </button>
-
-                    <nav class="flex bg-slate-800/80 p-1.5 rounded-2xl border border-slate-700/60 backdrop-blur-md overflow-x-auto w-full sm:w-auto justify-start sm:justify-end">
-                        <button id="nav-take" onclick="switchTab('take')" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 text-[11px] sm:text-sm font-bold rounded-xl transition-all duration-200 bg-amber-500 text-slate-950 shadow-md whitespace-nowrap shrink-0">
-                            <i class="fa-solid fa-calendar-check"></i>
-                            <span>Asistencia</span>
-                        </button>
-                        <button id="nav-acolytos" onclick="switchTab('acolytos')" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 text-[11px] sm:text-sm font-bold rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-200 whitespace-nowrap shrink-0">
-                            <i class="fa-solid fa-users"></i>
-                            <span>Perfiles</span>
-                        </button>
-                        <button id="nav-history" onclick="switchTab('history')" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 text-[11px] sm:text-sm font-bold rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-200 whitespace-nowrap shrink-0">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                            <span>Histórico</span>
-                        </button>
-                    </nav>
-                </div>
+    <!-- Encabezado Principal -->
+    <header class="bg-slate-800 border-b border-slate-700 shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-church text-amber-400 text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-wide text-white">Monaguillos Santa Catalina</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="status-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <i class="fa-solid fa-wifi mr-1"></i> Sincronizado
+                </span>
+                <span id="date-display" class="text-xs text-slate-400 font-mono bg-slate-900 px-3 py-1 rounded-md border border-slate-700"></span>
             </div>
         </div>
     </header>
 
-    <!-- Main Container Responsive -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <!-- Contenido Principal -->
+    <main class="max-w-6xl mx-auto px-4 mt-6">
+        
+        <!-- Pestañas / Navegación interna -->
+        <div class="flex border-b border-slate-700 mb-6 space-x-2">
+            <button onclick="switchTab('asistencia')" id="tab-asistencia" class="py-2 px-4 font-medium text-sm rounded-t-lg bg-amber-500 text-slate-950 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-user"></i> Tomar Asistencia
+            </button>
+            <button onclick="switchTab('historico')" id="tab-historico" class="py-2 px-4 font-medium text-sm rounded-t-lg bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left"></i> Histórico
+            </button>
+        </div>
 
-        <!-- Toast Notifications Container -->
-        <div id="toast-container" class="fixed bottom-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
-
-        <!-- TAB 1: ASISTENCIA Y OBSERVACIÓN DEL DÍA -->
-        <section id="tab-take" class="space-y-4 sm:space-y-6">
-            <!-- Day & Mass Configuration Card -->
-            <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md border border-slate-200/80">
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 sm:gap-4 border-b border-slate-100 pb-3 sm:pb-4 mb-4">
-                    <div>
-                        <h2 class="text-base sm:text-xl font-bold text-slate-900 flex items-center gap-2">
-                            <i class="fa-solid fa-calendar-day text-amber-500"></i>
-                            Programación del Día y Misa Servida
-                        </h2>
-                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 admin-only">Configura la fecha, escribe la misa u horario y selecciona únicamente a los acólitos asignados para hoy.</p>
-                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 visitor-only hidden">Fecha del servicio de asistencia consultado en tiempo real.</p>
-                    </div>
-                    <div class="admin-only flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                        <button onclick="openAddAcolytesToSessionModal()" class="flex-1 sm:flex-none px-3.5 sm:px-4 py-2 sm:py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-user-plus"></i>
-                            <span>+ Seleccionar Acólitos</span>
-                        </button>
-                        <button onclick="setAllStatus('presente')" class="flex-1 sm:flex-none px-3 sm:px-3.5 py-2 sm:py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs sm:text-sm font-bold border border-emerald-200 transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-check-double"></i>
-                            <span>Todos Presentes</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Input Fields restored for Admin Mode -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 admin-only">
-                    <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-slate-600 mb-1">Fecha de Servicio</label>
-                        <input type="date" id="session-date" onchange="updateVisitorDateDisplay()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-slate-600 mb-1">Hora de la Misa</label>
-                        <input type="time" id="session-time" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition">
-                    </div>
-                    <div class="sm:col-span-2 lg:col-span-1">
-                        <label class="block text-[11px] sm:text-xs font-bold text-slate-600 mb-1">Misa / Celebración (Opcional)</label>
-                        <input type="text" id="session-mass-name" placeholder="Ej: Dominical / Jóvenes" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 sm:py-2.5 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition">
-                    </div>
-                </div>
-
-                <!-- Interactive Date & Mass Selection for Visitor Mode -->
-                <div class="visitor-only hidden space-y-3">
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4">
-                        <div class="flex items-center gap-3 sm:pr-4 sm:border-r border-slate-200 pb-2 sm:pb-0 border-b sm:border-b-0">
-                            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-600 flex items-center justify-center text-base sm:text-lg shrink-0">
-                                <i class="fa-regular fa-calendar font-bold"></i>
-                            </div>
-                            <div class="flex-1">
-                                <label for="visitor-date-picker" class="text-[10px] sm:text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">Fecha a Consultar</label>
-                                <input type="date" id="visitor-date-picker" onchange="onVisitorDateChange(this.value)" class="text-xs sm:text-sm font-extrabold text-slate-900 bg-white border border-slate-300 rounded-xl px-2.5 py-1 focus:ring-2 focus:ring-amber-500 outline-none cursor-pointer w-full sm:w-auto">
-                            </div>
-                        </div>
-
-                        <div class="flex-1">
-                            <span class="text-[10px] sm:text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">Seleccionar Misa / Horario del Día</span>
-                            <div id="visitor-mass-buttons" class="flex flex-wrap items-center gap-2">
-                                <!-- Dynamic mass buttons rendered via JS -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- List of Programmed Acolytes for the Day -->
-            <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md border border-slate-200/80">
-                <div class="flex justify-between items-center mb-4 sm:mb-6">
-                    <h3 class="text-sm sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-blue-600"></i>
-                        Acólitos Programados para esta Misa
-                    </h3>
-                    <span id="assigned-count" class="text-[11px] sm:text-xs font-extrabold bg-blue-100 text-blue-800 px-2.5 sm:px-3 py-1 rounded-full shrink-0">0 seleccionados</span>
-                </div>
-
-                <div id="active-acolytes-list" class="space-y-3 sm:space-y-4">
-                    <!-- Populated dynamically via JS -->
-                </div>
-
-                <!-- Save Session Button -->
-                <div class="admin-only mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-100 flex justify-end">
-                    <button onclick="saveAttendanceSession()" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl shadow-lg hover:shadow-amber-500/25 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base">
-                        <i class="fa-solid fa-floppy-disk text-base sm:text-lg"></i>
-                        <span>Guardar Registro</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 2: GESTIÓN DE ACÓLITOS & PERFILES -->
-        <section id="tab-acolytos" class="space-y-4 sm:space-y-6 hidden">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <!-- Vista de Tomar Asistencia -->
+        <section id="view-asistencia" class="space-y-6">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap justify-between items-center gap-4">
                 <div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Catálogo General de Acólitos</h2>
-                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Administra el equipo y consulta su perfil detallado con evaluaciones en tiempo real.</p>
+                    <h2 class="text-lg font-semibold text-slate-200">Asistencia del Día</h2>
+                    <p class="text-xs text-slate-400">Selecciona el estado para cada uno de los 38 monaguillos</p>
                 </div>
-                <button onclick="openAddAcolyteModal()" class="admin-only w-full sm:w-auto px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Nuevo Acólito</span>
+                <button onclick="guardarAsistencia()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-5 py-2.5 rounded-lg font-bold shadow-lg transition duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Registros
                 </button>
             </div>
 
-            <!-- List Grid -->
-            <div id="acolytes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                <!-- Dynamic cards -->
+            <!-- Grid de Tarjetas de Monaguillos -->
+            <div id="grid-acolitos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Se genera dinámicamente con JS -->
             </div>
         </section>
 
-        <!-- TAB 3: HISTÓRICO GENERAL -->
-        <section id="tab-history" class="space-y-4 sm:space-y-6 hidden">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Histórico de Servicios</h2>
-                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Consulta todos los registros guardados y genera reportes ejecutivos en PDF.</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <button onclick="downloadComprehensiveReport()" class="flex-1 sm:flex-none px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs sm:text-sm font-extrabold shadow-md transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>Descargar Reporte PDF</span>
-                    </button>
-                    <button onclick="window.print()" class="flex-1 sm:flex-none px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-print"></i>
-                        <span>Imprimir</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md border border-slate-200">
-                <div id="history-container" class="space-y-4">
-                    <!-- Dynamic sessions -->
+        <!-- Vista de Histórico -->
+        <section id="view-historico" class="hidden space-y-4">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <h2 class="text-lg font-semibold text-slate-200 mb-4">Registros Guardados</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
+                            <tr>
+                                <th class="p-3">Fecha</th>
+                                <th class="p-3">Monaguillo</th>
+                                <th class="p-3">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-historico" class="divide-y divide-slate-700">
+                            <!-- Datos históricos -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- MODAL 1: PERFIL DE ACÓLITO Y EVALUACIÓN -->
-    <div id="acolyte-profile-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden">
-        <div class="bg-white rounded-2xl sm:rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col">
-            <!-- Modal Header -->
-            <div class="p-4 sm:p-6 bg-gradient-to-r from-slate-900 to-blue-950 text-white rounded-t-2xl sm:rounded-t-3xl relative">
-                <button onclick="closeProfileModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-400 hover:text-white text-lg sm:text-xl p-2">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-                <div class="flex items-center justify-between pr-8">
-                    <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-                        <div id="modal-acolyte-avatar" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-500 text-slate-950 font-extrabold text-xl sm:text-2xl flex items-center justify-center shadow-lg border-2 border-amber-300 shrink-0">
-                            --
-                        </div>
-                        <div class="min-w-0">
-                            <h3 id="modal-acolyte-name" class="text-base sm:text-xl font-bold truncate">Cargando...</h3>
-                            <p class="text-[11px] sm:text-xs text-slate-300 mt-1"><i class="fa-solid fa-user-shield text-amber-400 mr-1"></i> Miembro del Grupo</p>
-                        </div>
-                    </div>
-                    <!-- Botón Editar Perfil (Admin Only) -->
-                    <button onclick="openEditAcolyteModal()" class="admin-only hidden px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-xl transition flex items-center gap-1.5 shrink-0 shadow">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        <span>Editar Nombre</span>
-                    </button>
-                </div>
+    <!-- Modal para Editar Perfil / Notas -->
+    <div id="modal-edit" class="fixed inset-0 bg-black/70 hidden backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md rounded-xl p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-100" id="modal-title">Editar Detalle</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-
-            <div class="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1">
-                <!-- Stats Summary -->
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
-                    <div class="bg-blue-50 border border-blue-100 p-3 sm:p-4 rounded-2xl text-center">
-                        <span class="text-[10px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider block">Asistencia</span>
-                        <span id="modal-stat-attendance" class="text-2xl sm:text-3xl font-extrabold text-blue-900 mt-1 block">0%</span>
-                        <span id="modal-stat-counts" class="text-[10px] sm:text-xs text-slate-500 mt-1 block truncate">0 de 0 misas</span>
-                    </div>
-                    <div class="bg-slate-50 border border-slate-200 p-3 sm:p-4 rounded-2xl text-center">
-                        <span class="text-[10px] sm:text-xs font-bold text-slate-600 uppercase tracking-wider block">Última Evaluación</span>
-                        <span id="modal-stat-last-eval" class="text-xs sm:text-sm font-bold text-slate-800 mt-2 block truncate">Sin Evaluaciones</span>
-                    </div>
-                </div>
-
-                <!-- Add Behavior Rating Section (Admin Only) -->
-                <div class="admin-only bg-amber-50/50 border border-amber-200/80 p-4 sm:p-5 rounded-2xl space-y-3 sm:space-y-4">
-                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-award text-amber-600"></i>
-                        Registrar Evaluación de Comportamiento
-                    </h4>
-
-                    <!-- Category selection -->
-                    <div class="space-y-3">
-                        <div>
-                            <span class="text-[10px] sm:text-xs font-extrabold text-emerald-800 tracking-wide uppercase block mb-1.5">
-                                <i class="fa-solid fa-thumbs-up text-emerald-600 mr-1"></i> Buen Comportamiento
-                            </span>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
-                                <button type="button" onclick="selectBehaviorOption('Buen Comportamiento', 'Excelente')" class="behavior-opt-btn border border-emerald-300 bg-white hover:bg-emerald-500 hover:text-white px-2.5 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-700 text-center">
-                                    Excelente
-                                </button>
-                                <button type="button" onclick="selectBehaviorOption('Buen Comportamiento', 'Muy bueno')" class="behavior-opt-btn border border-emerald-300 bg-white hover:bg-emerald-500 hover:text-white px-2.5 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-700 text-center">
-                                    Muy bueno
-                                </button>
-                                <button type="button" onclick="selectBehaviorOption('Buen Comportamiento', 'Bueno')" class="behavior-opt-btn border border-emerald-300 bg-white hover:bg-emerald-500 hover:text-white px-2.5 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-700 text-center">
-                                    Bueno
-                                </button>
-                                <button type="button" onclick="selectBehaviorOption('Buen Comportamiento', 'Otro')" class="behavior-opt-btn border border-emerald-300 bg-white hover:bg-emerald-500 hover:text-white px-2.5 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-700 text-center">
-                                    Otro
-                                </button>
-                            </div>
-                        </div>
-
-                        <div>
-                            <span class="text-[10px] sm:text-xs font-extrabold text-rose-800 tracking-wide uppercase block mb-1.5">
-                                <i class="fa-solid fa-triangle-exclamation text-rose-600 mr-1"></i> Mal Comportamiento
-                            </span>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
-                                <button type="button" onclick="selectBehaviorOption('Mal Comportamiento', 'Alto')" class="behavior-opt-btn border border-rose-300 bg-white hover:bg-rose-500 hover:text-white px-2.5 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-700 text-center">
-                                    Alto
-                                </button>
-                                <button type="button" onclick="selectBehaviorOption('Mal Comportamiento', 'Medio')" class="behavior-opt-btn border border-rose-300 bg-white hover:bg-rose-500 hover:text-white px-2.5 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-700 text-center">
-                                    Medio
-                                </button>
-                                <button type="button" onclick="selectBehaviorOption('Mal Comportamiento', 'Bajo')" class="behavior-opt-btn border border-rose-300 bg-white hover:bg-rose-500 hover:text-white px-2.5 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-700 text-center">
-                                    Bajo
-                                </button>
-                                <button type="button" onclick="selectBehaviorOption('Mal Comportamiento', 'Otro')" class="behavior-opt-btn border border-rose-300 bg-white hover:bg-rose-500 hover:text-white px-2.5 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition text-slate-700 text-center">
-                                    Otro
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Selected Indicator -->
-                    <div id="selected-behavior-badge" class="hidden bg-slate-950 text-white text-xs px-3 py-1.5 rounded-xl font-bold items-center justify-between">
-                        <span class="truncate">Seleccionado: <strong id="selected-behavior-text" class="text-amber-400">Ninguno</strong></span>
-                    </div>
-
-                    <!-- Reason Input -->
-                    <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-slate-700 mb-1">Fecha de la Evaluación</label>
-                        <input type="date" id="modal-behavior-date" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-amber-500 outline-none mb-3">
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] sm:text-xs font-bold text-slate-700 mb-1">Razón o Detalle del Comportamiento</label>
-                        <textarea id="modal-behavior-reason" rows="2" placeholder="" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
-                    </div>
-
-                    <button onclick="saveBehaviorEvaluation()" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-bookmark"></i>
-                        <span>Guardar Evaluación</span>
-                    </button>
-                </div>
-
-                <!-- Recent Behavior History -->
-                <div>
-                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-list-ul text-slate-500"></i>
-                        Historial de Evaluaciones
-                    </h4>
-                    <div id="modal-behavior-history-list" class="space-y-2.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
-                        <!-- Populated dynamic -->
-                    </div>
-                </div>
+            <input type="hidden" id="edit-id">
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Nombre Completo</label>
+                <input type="text" id="edit-name" readonly class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-300 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Notas / Observaciones</label>
+                <textarea id="edit-notes" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm text-slate-100 focus:border-amber-500 focus:outline-none" placeholder="Agregar nota personal..."></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-xs font-semibold">Cancelar</button>
+                <button onclick="guardarCambiosModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded text-xs">Guardar Cambios</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 2: SELECCIONAR ACÓLITOS PARA LA MISA DEL DÍA -->
-    <div id="select-acolytes-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden">
-        <div class="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col">
-            <div class="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl sm:rounded-t-3xl">
-                <div>
-                    <h3 class="text-sm sm:text-base font-bold text-slate-900">Programar Acólitos para hoy</h3>
-                    <p class="text-[11px] sm:text-xs text-slate-500">Marca únicamente a los acólitos que asistirán a esta misa</p>
-                </div>
-                <button onclick="closeSelectAcolytesModal()" class="text-slate-400 hover:text-slate-700 text-lg p-1">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="p-4 sm:p-6 space-y-3 sm:space-y-4 flex-1">
-                <div class="flex justify-between items-center">
-                    <button onclick="selectAllForToday()" class="text-xs font-bold text-blue-600 hover:underline">Seleccionar todos</button>
-                    <button onclick="deselectAllForToday()" class="text-xs font-bold text-rose-600 hover:underline">Desmarcar todos</button>
-                </div>
-                <div id="acolytes-selector-list" class="space-y-2.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
-                    <!-- Populated dynamic -->
-                </div>
-            </div>
-            <div class="p-4 sm:p-5 border-t border-slate-100 flex justify-end gap-2 bg-slate-50 rounded-b-2xl sm:rounded-b-3xl">
-                <button onclick="closeSelectAcolytesModal()" class="px-4 py-2 bg-slate-200 text-slate-700 text-xs font-bold rounded-xl">Cancelar</button>
-                <button onclick="confirmSelectedAcolytesForToday()" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold rounded-xl shadow-md">Aceptar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL 3: NUEVO ACÓLITO -->
-    <div id="add-acolyte-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden">
-        <div class="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 flex flex-col">
-            <div class="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl sm:rounded-t-3xl">
-                <h3 class="text-sm sm:text-base font-bold text-slate-900">Registrar Nuevo Acólito</h3>
-                <button onclick="closeAddAcolyteModal()" class="text-slate-400 hover:text-slate-700 text-lg p-1">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <form id="new-acolyte-form" onsubmit="handleCreateAcolyte(event)" class="p-4 sm:p-6 space-y-4">
-                <div>
-                    <label class="block text-[11px] sm:text-xs font-bold text-slate-700 mb-1">Nombre Completo *</label>
-                    <input type="text" id="new-name" required placeholder="Ej: Juan Pérez" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs font-medium focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="closeAddAcolyteModal()" class="px-4 py-2 bg-slate-200 text-slate-700 text-xs font-bold rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold rounded-xl shadow-md">Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL 4: EDITAR ACÓLITO -->
-    <div id="edit-acolyte-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden">
-        <div class="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 flex flex-col">
-            <div class="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl sm:rounded-t-3xl">
-                <h3 class="text-sm sm:text-base font-bold text-slate-900">Editar Nombre de Acólito</h3>
-                <button onclick="closeEditAcolyteModal()" class="text-slate-400 hover:text-slate-700 text-lg p-1">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <form id="edit-acolyte-form" onsubmit="handleEditAcolyte(event)" class="p-4 sm:p-6 space-y-4">
-                <div>
-                    <label class="block text-[11px] sm:text-xs font-bold text-slate-700 mb-1">Nombre Completo *</label>
-                    <input type="text" id="edit-name-input" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs font-medium focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div class="pt-2 flex justify-end gap-2">
-                    <button type="button" onclick="closeEditAcolyteModal()" class="px-4 py-2 bg-slate-200 text-slate-700 text-xs font-bold rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold rounded-xl shadow-md">Actualizar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL DE CONTRASEÑA PARA ADMINISTRADOR -->
-    <div id="admin-auth-modal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden">
-        <div class="bg-white rounded-2xl sm:rounded-3xl max-w-sm w-full shadow-2xl border border-slate-100 p-5 sm:p-6 text-center">
-            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500/20 text-amber-600 rounded-2xl mx-auto flex items-center justify-center text-xl sm:text-2xl mb-4 border border-amber-400/30">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <h3 class="text-base sm:text-lg font-bold text-slate-900">Acceso a Administrador</h3>
-            <p class="text-[11px] sm:text-xs text-slate-500 mt-1 mb-4">Ingresa la clave para acceder a las opciones de edición.</p>
-            
-            <input type="password" id="admin-pass-input" placeholder="Contraseña..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-center text-sm font-bold tracking-widest focus:ring-2 focus:ring-amber-500 outline-none mb-4" onkeyup="if(event.key==='Enter') verifyAdminPassword()">
-            
-            <div class="flex gap-2">
-                <button onclick="closeAdminAuthModal()" class="w-1/2 py-2.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl">Cancelar</button>
-                <button onclick="verifyAdminPassword()" class="w-1/2 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold rounded-xl shadow-md">Ingresar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SUPABASE CLOUD SYNC LOGIC -->
+    <!-- Script Lógico Principal -->
     <script>
-        const SUPABASE_URL = 'https://gukqudnwxuipwdowigyx.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_Q_nG1ylx6OJu-SwZ7NfNlw_nau10ZfP';
+        // --- 1. CONFIGURACIÓN DE SUPABASE ---
+        // (Sustituye estas credenciales si tienes un proyecto propio configurado)
+        const SUPABASE_URL = 'https://xyzcompany.supabase.co';
+        const SUPABASE_KEY = 'public-anon-key';
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-        let supabaseClient = null;
-        try {
-            const { createClient } = window.supabase;
-            supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.warn("Supabase no inicializado.");
-        }
+        // --- 2. LISTA OFICIAL DE 38 MONAGUILLOS ---
+        const OFICIALES = [
+            "Andrea", "Ángela", "Angelina", "Ariel", "Aylin", "Camila", "Carlitos",
+            "Carlos", "Cesar", "Cristofer", "Diego", "Edwin", "Emerson", "Estebana",
+            "Fátima", "Gabi", "Gerson", "Guillermo", "Ignacio", "Jacqueline", "Javier",
+            "Jimena", "José", "Juan", "Lucas", "Luis", "Manuel", "Mateo", "Matías",
+            "Miguel", "Mónica", "Néstor", "Noemí", "Pablo", "Raúl", "Roxana", "Sofía", "Natalia Pérez"
+        ];
 
-        // LISTA OFICIAL FIJA DE LOS 38 ACÓLITOS
-        const DEFAULT_ACOLYTES = [
-            "Andrea", "Gabriel", "Carlos Flores", "Daniel Ernesto", "Josue", "Katherine", "Matías", "Denzel", 
-            "Rosío", "Johana", "Abigail", "Jessica", "Yamilet", "Daniel Antonio", "Helen", "Alison", 
-            "Máximiliano", "Fabricio", "Camila", "Marlon", "Liliana estefany", "Moisea", "Glenda", "Angel", 
-            "Jennifer", "Jhony", "Rosa", "Misael", "Carlos enmanuel", "Valentina", "Francisco Eugenio", 
-            "Emeli Pérez", "Oscar Pérez", "Adriana Pérez", "Edgar Pérez", "Mybelin Pérez", "Alexia Pérez", "Natalia Pérez"
-        ].map((name, index) => ({
-            id: String(index + 1),
-            name: name,
-            evaluations: []
-        }));
+        // Estado Global
+        let acolitosData = JSON.parse(localStorage.getItem('acolitos_local')) || OFICIALES.map((n, i) => ({ id: i + 1, nombre: n, estado: 'presente', notas: '' }));
+        let historicoData = JSON.parse(localStorage.getItem('historico_local')) || [];
 
-        window.acolytes = DEFAULT_ACOLYTES;
-        window.activeDayAcolytes = DEFAULT_ACOLYTES.map(a => a.id);
-        window.currentStatuses = {};
-        window.savedSessions = [];
-        window.currentSelectedProfileId = null;
-
-        window.selectedBehaviorCategory = null;
-        window.selectedBehaviorSubOption = null;
-        window.userMode = 'visitor';
-        window.activeVisitorSessionId = null;
-
-        async function initCloudSync() {
-            loadLocalData();
-            renderAll();
-
-            if (!supabaseClient) return;
-
-            try {
-                const { data: resAcolitos, error: errAcolitos } = await supabaseClient.from('acolitos').select('*');
-                if (!errAcolitos && resAcolitos && resAcolitos.length > 0) {
-                    window.acolytes = resAcolitos.map(item => ({
-                        id: String(item.id),
-                        name: item.nombre || item.name,
-                        evaluations: item.evaluaciones || []
-                    }));
-                }
-
-                const { data: resHistorial, error: errHistorial } = await supabaseClient.from('historial_asistencias').select('*');
-                if (!errHistorial && resHistorial && resHistorial.length > 0) {
-                    window.savedSessions = resHistorial.map(item => ({
-                        id: String(item.id),
-                        date: item.fecha || item.date,
-                        time: item.hora || item.time || '',
-                        massName: item.misa || item.massName || '',
-                        records: item.asistencias_json || item.records || []
-                    }));
-                }
-
-                saveLocalData();
-                document.getElementById('cloud-status-badge').innerHTML = `<i class="fa-solid fa-cloud text-[9px]"></i> Sincronizado en Supabase`;
-                renderAll();
-            } catch (err) {
-                console.warn("Error con Supabase:", err);
-            }
-        }
-
-        window.saveCloudData = async function() {
-            saveLocalData();
-        }
-
-        window.manualSaveData = async function() {
-            saveLocalData();
-            await saveCloudData();
-            showToast("¡Cambios guardados con éxito!", "success");
-        }
-
-        window.promptAdminAccess = function() {
-            if (window.userMode === 'admin') {
-                showToast("Ya te encuentras en Modo Administrador", "info");
-                return;
-            }
-            document.getElementById('admin-pass-input').value = '';
-            document.getElementById('admin-auth-modal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('admin-pass-input').focus(), 100);
-        }
-
-        window.closeAdminAuthModal = function() {
-            document.getElementById('admin-auth-modal').classList.add('hidden');
-        }
-
-        window.verifyAdminPassword = function() {
-            const pass = document.getElementById('admin-pass-input').value;
-            if (pass === 'Monaguillos') {
-                closeAdminAuthModal();
-                setUserMode('admin');
-            } else {
-                showToast("Contraseña incorrecta", "error");
-            }
-        }
-
-        window.setUserMode = function(mode) {
-            window.userMode = mode;
-            const exitAdminBtn = document.getElementById('exit-admin-btn');
-            const exitAdminBtnMobile = document.getElementById('exit-admin-btn-mobile');
-
-            if (mode === 'admin') {
-                if (exitAdminBtn) exitAdminBtn.classList.remove('hidden');
-                if (exitAdminBtnMobile) exitAdminBtnMobile.classList.remove('hidden');
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-                document.querySelectorAll('.visitor-only').forEach(el => el.classList.add('hidden'));
-                showToast("Modo Administrador activado", "info");
-            } else {
-                if (exitAdminBtn) exitAdminBtn.classList.add('hidden');
-                if (exitAdminBtnMobile) exitAdminBtnMobile.classList.add('hidden');
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-                document.querySelectorAll('.visitor-only').forEach(el => el.classList.remove('hidden'));
-
-                const adminDateVal = document.getElementById('session-date').value;
-                const visitorPicker = document.getElementById('visitor-date-picker');
-                if (adminDateVal) {
-                    visitorPicker.value = adminDateVal;
-                }
-                updateVisitorDateDisplay();
-            }
-
-            renderActiveAcolytesList();
-            renderAcolytesGrid();
-        }
-
-        window.onVisitorDateChange = function(newDateVal) {
-            if (newDateVal) {
-                document.getElementById('session-date').value = newDateVal;
-                updateVisitorDateDisplay();
-            }
-        }
-
-        window.updateVisitorDateDisplay = function() {
-            const visitorPicker = document.getElementById('visitor-date-picker');
-            const dateVal = visitorPicker.value || document.getElementById('session-date').value;
-            if (dateVal) {
-                visitorPicker.value = dateVal;
-                const [yyyy, mm, dd] = dateVal.split('-');
-                const formattedDate = `${dd}/${mm}/${yyyy}`;
-                renderVisitorMassButtons(formattedDate);
-            }
-        }
-
-        window.renderVisitorMassButtons = function(dateStr) {
-            const container = document.getElementById('visitor-mass-buttons');
-            container.innerHTML = '';
-
-            const daySessions = window.savedSessions.filter(s => s.date === dateStr);
-
-            if (daySessions.length === 0) {
-                container.innerHTML = `<span class="text-xs text-slate-400 italic">No hay misas guardadas para esta fecha.</span>`;
-                window.activeVisitorSessionId = null;
-                renderActiveAcolytesList();
-                return;
-            }
-
-            if (!window.activeVisitorSessionId || !daySessions.some(s => s.id === window.activeVisitorSessionId)) {
-                window.activeVisitorSessionId = daySessions[0].id;
-            }
-
-            daySessions.forEach(session => {
-                const isActive = session.id === window.activeVisitorSessionId;
-                const labelText = `${session.time || 'Misa'} ${session.massName ? `(${session.massName})` : ''}`;
-                
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.onclick = () => selectVisitorSession(session.id);
-                btn.className = `px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center gap-1.5 shrink-0 ${
-                    isActive 
-                    ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-400' 
-                    : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
-                }`;
-                btn.innerHTML = `<i class="fa-solid fa-church ${isActive ? 'text-slate-950' : 'text-amber-500'}"></i> ${labelText}`;
-                container.appendChild(btn);
-            });
-
-            renderActiveAcolytesList();
-        }
-
-        window.selectVisitorSession = function(sessionId) {
-            window.activeVisitorSessionId = sessionId;
-            const dateVal = document.getElementById('session-date').value;
-            if (dateVal) {
-                const [yyyy, mm, dd] = dateVal.split('-');
-                renderVisitorMassButtons(`${dd}/${mm}/${yyyy}`);
-            }
-        }
-
-        window.switchTab = function(tabName) {
-            document.getElementById('tab-take').classList.add('hidden');
-            document.getElementById('tab-acolytos').classList.add('hidden');
-            document.getElementById('tab-history').classList.add('hidden');
-
-            const btnTake = document.getElementById('nav-take');
-            const btnAcolytos = document.getElementById('nav-acolytos');
-            const btnHistory = document.getElementById('nav-history');
-
-            const inactiveClass = "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 text-[11px] sm:text-sm font-bold rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-200 whitespace-nowrap shrink-0";
-            const activeClass = "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 text-[11px] sm:text-sm font-bold rounded-xl transition-all duration-200 bg-amber-500 text-slate-950 shadow-md whitespace-nowrap shrink-0";
-
-            btnTake.className = inactiveClass;
-            btnAcolytos.className = inactiveClass;
-            btnHistory.className = inactiveClass;
-
-            if (tabName === 'take') {
-                document.getElementById('tab-take').classList.remove('hidden');
-                btnTake.className = activeClass;
-                renderActiveAcolytesList();
-            } else if (tabName === 'acolytos') {
-                document.getElementById('tab-acolytos').classList.remove('hidden');
-                btnAcolytos.className = activeClass;
-                renderAcolytesGrid();
-            } else if (tabName === 'history') {
-                document.getElementById('tab-history').classList.remove('hidden');
-                btnHistory.className = activeClass;
-                renderHistory();
-            }
-        }
-
-        window.renderAll = function() {
-            renderActiveAcolytesList();
-            renderAcolytesGrid();
-            renderHistory();
-        }
-
-        window.renderActiveAcolytesList = function() {
-            const container = document.getElementById('active-acolytes-list');
-            const isAdmin = window.userMode === 'admin';
-
-            if (!isAdmin && window.activeVisitorSessionId) {
-                const session = window.savedSessions.find(s => s.id === window.activeVisitorSessionId);
-                if (session) {
-                    document.getElementById('assigned-count').innerText = `${session.records.length} registrados`;
-                    container.innerHTML = '';
-
-                    session.records.forEach(r => {
-                        const nameDisplay = r.name || 'Acólito';
-                        const card = document.createElement('div');
-                        card.className = "bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 transition";
-                        card.innerHTML = `
-                            <div class="flex justify-between items-center gap-2">
-                                <div class="flex items-center gap-2.5 min-w-0">
-                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/20 text-amber-800 font-extrabold flex items-center justify-center text-xs sm:text-sm border border-amber-300/40 shrink-0">
-                                        ${nameDisplay.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div class="min-w-0">
-                                        <h4 class="font-extrabold text-slate-900 text-xs sm:text-base truncate">${nameDisplay}</h4>
-                                    </div>
-                                </div>
-                                <div class="shrink-0">
-                                    <span class="px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-bold uppercase ${
-                                        r.status === 'presente' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
-                                        r.status === 'ausente' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
-                                        r.status === 'permiso' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
-                                        r.status === 'sustituto' ? 'bg-purple-100 text-purple-800 border border-purple-300' : 'bg-blue-100 text-blue-800 border border-blue-300'
-                                    }">
-                                        ${r.status} ${r.status === 'sustituto' && r.substituteName ? `(${r.substituteName})` : ''}
-                                    </span>
-                                </div>
-                            </div>
-                            ${r.note ? `<p class="text-[11px] sm:text-xs text-slate-600 bg-white p-2 rounded-xl border border-slate-200 mt-2"><strong>Observación:</strong> ${r.note}</p>` : ''}
-                        `;
-                        container.appendChild(card);
-                    });
-                    return;
-                }
-            }
-
-            document.getElementById('assigned-count').innerText = `${window.activeDayAcolytes.length} asignados`;
-
-            if (window.activeDayAcolytes.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 sm:py-10 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-4">
-                        <i class="fa-solid fa-user-slash text-2xl sm:text-3xl text-slate-300 mb-2"></i>
-                        <p class="text-xs sm:text-sm font-bold text-slate-600">No hay acólitos programados para este servicio.</p>
-                        ${isAdmin ? '<p class="text-[11px] sm:text-xs text-slate-400 mt-1">Haz clic en "+ Seleccionar Acólitos" para marcar únicamente a quien estuvo presente hoy.</p>' : ''}
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = '';
-
-            window.activeDayAcolytes.forEach(id => {
-                const acolyte = window.acolytes.find(a => a.id === id);
-                if (!acolyte) return;
-
-                if (!window.currentStatuses[id]) {
-                    window.currentStatuses[id] = { status: 'presente', note: '' };
-                }
-
-                const current = window.currentStatuses[id];
-
-                const card = document.createElement('div');
-                card.className = "bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 transition hover:border-slate-300 space-y-2.5";
-                
-                card.innerHTML = `
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2.5">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/20 text-amber-800 font-extrabold flex items-center justify-center text-xs sm:text-sm border border-amber-300/40 shrink-0">
-                                ${acolyte.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div class="min-w-0">
-                                <h4 class="font-extrabold text-slate-900 text-xs sm:text-base truncate">${acolyte.name}</h4>
-                            </div>
-                        </div>
-
-                        ${isAdmin ? `
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            <button onclick="setAcolyteStatus('${id}', 'presente')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 ${current.status === 'presente' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                                <i class="fa-solid fa-circle-check"></i> Pres.
-                            </button>
-                            <button onclick="setAcolyteStatus('${id}', 'ausente')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 ${current.status === 'ausente' ? 'bg-rose-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                                <i class="fa-solid fa-circle-xmark"></i> Aus.
-                            </button>
-                            <button onclick="setAcolyteStatus('${id}', 'permiso')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 ${current.status === 'permiso' ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                                <i class="fa-solid fa-envelope"></i> Perm.
-                            </button>
-                            <button onclick="setAcolyteStatus('${id}', 'tardanza')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 ${current.status === 'tardanza' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                                <i class="fa-solid fa-clock"></i> Tard.
-                            </button>
-                            <button onclick="setAcolyteStatus('${id}', 'sustituto')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition flex items-center gap-1 ${current.status === 'sustituto' ? 'bg-purple-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                                <i class="fa-solid fa-user-gear"></i> Sust.
-                            </button>
-                            <button onclick="removeFromToday('${id}')" class="p-1.5 text-slate-400 hover:text-rose-600 text-xs ml-0.5" title="Quitar de esta misa">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                        ` : `
-                        <div class="flex items-center gap-2">
-                            <span class="px-3 py-1 rounded-xl text-[11px] sm:text-xs font-bold uppercase ${
-                                current.status === 'presente' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
-                                current.status === 'ausente' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
-                                current.status === 'permiso' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
-                                current.status === 'sustituto' ? 'bg-purple-100 text-purple-800 border border-purple-300' : 'bg-blue-100 text-blue-800 border border-blue-300'
-                            }">
-                                ${current.status}
-                            </span>
-                        </div>
-                        `}
-                    </div>
-
-                    ${current.status === 'sustituto' ? `
-                    <div class="p-2 sm:p-2.5 bg-purple-50 border border-purple-200 rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                        <span class="text-[11px] sm:text-xs font-bold text-purple-900 whitespace-nowrap">
-                            <i class="fa-solid fa-user-group text-purple-600 mr-1"></i> Sustituido por:
-                        </span>
-                        ${isAdmin ? `
-                        <select onchange="setAcolyteSubstitute('${id}', this.value)" class="w-full sm:w-auto bg-white border border-purple-300 text-purple-950 text-xs font-bold rounded-lg px-2.5 py-1 focus:ring-2 focus:ring-purple-500 outline-none">
-                            <option value="">-- Seleccionar quién lo reemplazó --</option>
-                            ${window.acolytes.filter(a => a.id !== id).map(a => `
-                                <option value="${a.name}" ${current.substituteName === a.name ? 'selected' : ''}>${a.name}</option>
-                            `).join('')}
-                        </select>
-                        ` : `
-                        <span class="text-xs font-extrabold text-purple-900">${current.substituteName || 'Sin especificar'}</span>
-                        `}
-                    </div>
-                    ` : ''}
-
-                    <div>
-                        ${isAdmin ? `
-                        <input type="text" value="${current.note || ''}" onchange="setAcolyteNote('${id}', this.value)" placeholder="Observación específica de hoy..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-amber-500">
-                        ` : `
-                        ${current.note ? `<p class="text-[11px] sm:text-xs text-slate-600 bg-white p-2 rounded-xl border border-slate-200"><strong>Observación:</strong> ${current.note}</p>` : ''}
-                        `}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        window.setAcolyteStatus = function(id, status) {
-            if (window.userMode !== 'admin') return;
-            if (!window.currentStatuses[id]) window.currentStatuses[id] = { status: 'presente', note: '', substituteName: '' };
-            window.currentStatuses[id].status = status;
-            renderActiveAcolytesList();
-        }
-
-        window.setAcolyteSubstitute = function(id, substituteName) {
-            if (window.userMode !== 'admin') return;
-            if (!window.currentStatuses[id]) window.currentStatuses[id] = { status: 'sustituto', note: '', substituteName: '' };
-            window.currentStatuses[id].substituteName = substituteName;
-        }
-
-        window.setAcolyteNote = function(id, note) {
-            if (window.userMode !== 'admin') return;
-            if (!window.currentStatuses[id]) window.currentStatuses[id] = { status: 'presente', note: '', substituteName: '' };
-            window.currentStatuses[id].note = note;
-        }
-
-        window.setAllStatus = function(status) {
-            if (window.userMode !== 'admin') return;
-            window.activeDayAcolytes.forEach(id => {
-                if (!window.currentStatuses[id]) window.currentStatuses[id] = { status: 'presente', note: '' };
-                window.currentStatuses[id].status = status;
-            });
-            renderActiveAcolytesList();
-            showToast("Se marcaron todos como Presentes", "success");
-        }
-
-        window.removeFromToday = function(id) {
-            if (window.userMode !== 'admin') return;
-            window.activeDayAcolytes = window.activeDayAcolytes.filter(aId => aId !== id);
-            renderActiveAcolytesList();
-        }
-
-        window.saveAttendanceSession = async function() {
-            if (window.userMode !== 'admin') {
-                showToast("Debes estar en Modo Administrador para guardar", "error");
-                return;
-            }
-
-            if (window.activeDayAcolytes.length === 0) {
-                showToast("Selecciona al menos 1 acólito para esta misa", "error");
-                return;
-            }
-
-            const dateInput = document.getElementById('session-date').value;
-            const timeInput = document.getElementById('session-time').value;
-            const massNameInput = document.getElementById('session-mass-name').value.trim();
-
-            if (!dateInput) {
-                showToast("Por favor selecciona una fecha", "error");
-                return;
-            }
-
-            const [yyyy, mm, dd] = dateInput.split('-');
-            const formattedDate = `${dd}/${mm}/${yyyy}`;
+        // Inicialización al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            document.getElementById('date-display').innerText = today;
             
-            let timeInfo = '';
-            if (timeInput) {
-                const [hours, minutes] = timeInput.split(':');
-                let h = parseInt(hours, 10);
-                const ampm = h >= 12 ? 'p. m.' : 'a. m.';
-                h = h % 12 || 12;
-                const strHours = h < 10 ? '0' + h : h;
-                timeInfo = `${strHours}:${minutes} ${ampm}`;
-            }
-
-            const records = window.activeDayAcolytes.map(id => {
-                const acolyte = window.acolytes.find(a => a.id === id);
-                const current = window.currentStatuses[id] || { status: 'presente', note: '', substituteName: '' };
-                return {
-                    acolyteId: id,
-                    name: acolyte ? acolyte.name : 'Acólito',
-                    status: current.status,
-                    substituteName: current.substituteName || '',
-                    note: current.note || ''
-                };
-            });
-
-            const newSession = {
-                id: Date.now().toString(),
-                date: formattedDate,
-                time: timeInfo,
-                massName: massNameInput,
-                records: records
-            };
-
-            window.savedSessions.unshift(newSession);
-            await saveCloudData();
-
-            renderHistory();
-            renderAcolytesGrid();
-
-            showToast("¡Registro guardado exitosamente!", "success");
-        }
-
-        window.openAddAcolytesToSessionModal = function() {
-            const list = document.getElementById('acolytes-selector-list');
-            list.innerHTML = '';
-
-            window.acolytes.forEach(acolyte => {
-                const isSelected = window.activeDayAcolytes.includes(acolyte.id);
-                const item = document.createElement('label');
-                item.className = "flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white cursor-pointer transition";
-                item.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-800 font-bold flex items-center justify-center text-xs">
-                            ${acolyte.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span class="text-xs font-bold text-slate-800">${acolyte.name}</span>
-                    </div>
-                    <input type="checkbox" value="${acolyte.id}" ${isSelected ? 'checked' : ''} class="w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500">
-                `;
-                list.appendChild(item);
-            });
-
-            document.getElementById('select-acolytes-modal').classList.remove('hidden');
-        }
-
-        window.closeSelectAcolytesModal = function() {
-            document.getElementById('select-acolytes-modal').classList.add('hidden');
-        }
-
-        window.selectAllForToday = function() {
-            const checkboxes = document.querySelectorAll('#acolytes-selector-list input[type="checkbox"]');
-            checkboxes.forEach(cb => cb.checked = true);
-        }
-
-        window.deselectAllForToday = function() {
-            const checkboxes = document.querySelectorAll('#acolytes-selector-list input[type="checkbox"]');
-            checkboxes.forEach(cb => cb.checked = false);
-        }
-
-        window.confirmSelectedAcolytesForToday = function() {
-            const checkboxes = document.querySelectorAll('#acolytes-selector-list input[type="checkbox"]:checked');
-            window.activeDayAcolytes = Array.from(checkboxes).map(cb => cb.value);
-            closeSelectAcolytesModal();
-            renderActiveAcolytesList();
-            showToast("Lista actualizada", "success");
-        }
-
-        window.openAddAcolyteModal = function() {
-            if (window.userMode !== 'admin') return;
-            document.getElementById('new-acolyte-form').reset();
-            document.getElementById('add-acolyte-modal').classList.remove('hidden');
-        }
-
-        window.closeAddAcolyteModal = function() {
-            document.getElementById('add-acolyte-modal').classList.add('hidden');
-        }
-
-        window.handleCreateAcolyte = async function(e) {
-            e.preventDefault();
-            const name = document.getElementById('new-name').value.trim();
-
-            if (!name) return;
-
-            const newId = Date.now().toString();
-            const newAcolyte = {
-                id: newId,
-                name: name,
-                evaluations: []
-            };
-
-            window.acolytes.push(newAcolyte);
-            await saveCloudData();
-
-            closeAddAcolyteModal();
-            renderAcolytesGrid();
-            renderActiveAcolytesList();
-            showToast(`¡Acólito ${name} agregado!`, "success");
-        }
-
-        // FUNCIONES DE EDICIÓN DE PERFIL
-        window.openEditAcolyteModal = function() {
-            if (window.userMode !== 'admin' || !window.currentSelectedProfileId) return;
-            const acolyte = window.acolytes.find(a => a.id === window.currentSelectedProfileId);
-            if (!acolyte) return;
-
-            document.getElementById('edit-name-input').value = acolyte.name;
-            document.getElementById('edit-acolyte-modal').classList.remove('hidden');
-        }
-
-        window.closeEditAcolyteModal = function() {
-            document.getElementById('edit-acolyte-modal').classList.add('hidden');
-        }
-
-        window.handleEditAcolyte = async function(e) {
-            e.preventDefault();
-            if (!window.currentSelectedProfileId) return;
-
-            const newName = document.getElementById('edit-name-input').value.trim();
-            if (!newName) return;
-
-            const acolyte = window.acolytes.find(a => a.id === window.currentSelectedProfileId);
-            if (acolyte) {
-                acolyte.name = newName;
-                await saveCloudData();
-
-                closeEditAcolyteModal();
-                openProfileModal(window.currentSelectedProfileId);
-                renderAcolytesGrid();
-                renderActiveAcolytesList();
-                renderHistory();
-                showToast("Nombre actualizado con éxito", "success");
-            }
-        }
-
-        window.deleteAcolyte = async function(id) {
-            if (window.userMode !== 'admin') return;
-            const acolyte = window.acolytes.find(a => a.id === id);
-            if (!acolyte) return;
-
-            window.acolytes = window.acolytes.filter(a => a.id !== id);
-            window.activeDayAcolytes = window.activeDayAcolytes.filter(aId => aId !== id);
-            delete window.currentStatuses[id];
-
-            await saveCloudData();
-            renderAcolytesGrid();
-            renderActiveAcolytesList();
-            showToast(`Acólito "${acolyte.name}" eliminado`, "info");
-        }
-
-        window.selectBehaviorOption = function(category, subOption) {
-            window.selectedBehaviorCategory = category;
-            window.selectedBehaviorSubOption = subOption;
-
-            document.querySelectorAll('.behavior-opt-btn').forEach(btn => {
-                btn.classList.remove('ring-2', 'ring-amber-500', 'bg-slate-900', 'text-white');
-            });
-
-            const badge = document.getElementById('selected-behavior-badge');
-            const text = document.getElementById('selected-behavior-text');
-            badge.classList.remove('hidden');
-            badge.classList.add('flex');
-            text.innerText = `${category} - ${subOption}`;
-        }
-
-        window.saveBehaviorEvaluation = async function() {
-            if (window.userMode !== 'admin' || !window.currentSelectedProfileId) return;
-
-            if (!window.selectedBehaviorCategory || !window.selectedBehaviorSubOption) {
-                showToast("Por favor selecciona una categoría", "error");
-                return;
-            }
-
-            const evalDate = document.getElementById('modal-behavior-date').value;
-            const reason = document.getElementById('modal-behavior-reason').value.trim();
-
-            if (!evalDate) {
-                showToast("Por favor selecciona la fecha", "error");
-                return;
-            }
-
-            const [yyyy, mm, dd] = evalDate.split('-');
-            const formattedDate = `${dd}/${mm}/${yyyy}`;
-
-            const acolyte = window.acolytes.find(a => a.id === window.currentSelectedProfileId);
-            if (acolyte) {
-                if (!acolyte.evaluations) acolyte.evaluations = [];
-                acolyte.evaluations.unshift({
-                    date: formattedDate,
-                    category: window.selectedBehaviorCategory,
-                    subOption: window.selectedBehaviorSubOption,
-                    reason: reason || 'Sin observaciones adicionales'
-                });
-
-                await saveCloudData();
-                openProfileModal(window.currentSelectedProfileId);
-                renderAcolytesGrid();
-                showToast("Evaluación guardada con éxito", "success");
-
-                window.selectedBehaviorCategory = null;
-                window.selectedBehaviorSubOption = null;
-                document.getElementById('selected-behavior-badge').classList.add('hidden');
-                document.getElementById('modal-behavior-reason').value = '';
-            }
-        }
-
-        window.openProfileModal = function(id) {
-            window.currentSelectedProfileId = id;
-            const acolyte = window.acolytes.find(a => a.id === id);
-            if (!acolyte) return;
-
-            document.getElementById('modal-acolyte-avatar').innerText = acolyte.name.charAt(0).toUpperCase();
-            document.getElementById('modal-acolyte-name').innerText = acolyte.name;
-
-            let totalSessions = 0;
-            let attendedSessions = 0;
-
-            window.savedSessions.forEach(session => {
-                const rec = session.records.find(r => r.acolyteId === id);
-                if (rec) {
-                    totalSessions++;
-                    if (rec.status === 'presente' || rec.status === 'tardanza' || rec.status === 'sustituto') {
-                        attendedSessions++;
-                    }
-                }
-            });
-
-            const percent = totalSessions > 0 ? Math.round((attendedSessions / totalSessions) * 100) : 100;
-            document.getElementById('modal-stat-attendance').innerText = `${percent}%`;
-            document.getElementById('modal-stat-counts').innerText = `${attendedSessions} de ${totalSessions} misas`;
-
-            const lastEvalElem = document.getElementById('modal-stat-last-eval');
-            if (acolyte.evaluations && acolyte.evaluations.length > 0) {
-                const last = acolyte.evaluations[0];
-                lastEvalElem.innerHTML = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold ${last.category === 'Buen Comportamiento' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${last.subOption}</span> <span class="text-[10px] text-slate-500 block mt-1">${last.date}</span>`;
-            } else {
-                lastEvalElem.innerText = 'Sin Evaluaciones';
-            }
-
-            document.getElementById('modal-behavior-date').value = new Date().toISOString().split('T')[0];
-
-            const historyList = document.getElementById('modal-behavior-history-list');
-            historyList.innerHTML = '';
-
-            if (!acolyte.evaluations || acolyte.evaluations.length === 0) {
-                historyList.innerHTML = `<p class="text-xs text-slate-400 py-3 text-center">No hay evaluaciones registradas.</p>`;
-            } else {
-                acolyte.evaluations.forEach(ev => {
-                    const isGood = ev.category === 'Buen Comportamiento';
-                    const item = document.createElement('div');
-                    item.className = `p-3 rounded-xl border text-xs ${isGood ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'}`;
-                    item.innerHTML = `
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-extrabold ${isGood ? 'text-emerald-800' : 'text-rose-800'}">${ev.subOption}</span>
-                            <span class="text-slate-400 text-[10px]">${ev.date}</span>
-                        </div>
-                        <p class="text-slate-600 text-[11px] sm:text-xs">${ev.reason}</p>
-                    `;
-                    historyList.appendChild(item);
-                });
-            }
-
-            document.getElementById('acolyte-profile-modal').classList.remove('hidden');
-        }
-
-        window.closeProfileModal = function() {
-            document.getElementById('acolyte-profile-modal').classList.add('hidden');
-            window.currentSelectedProfileId = null;
-        }
-
-        window.renderAcolytesGrid = function() {
-            const container = document.getElementById('acolytes-grid');
-            container.innerHTML = '';
-
-            if (window.acolytes.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-12 bg-white rounded-3xl border border-slate-200 p-4">
-                        <i class="fa-solid fa-users-slash text-3xl sm:text-4xl text-slate-300 mb-2"></i>
-                        <p class="text-xs sm:text-sm font-bold text-slate-600">No hay acólitos registrados.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            window.acolytes.forEach(acolyte => {
-                let totalSessions = 0;
-                let attendedSessions = 0;
-
-                window.savedSessions.forEach(session => {
-                    const rec = session.records.find(r => r.acolyteId === acolyte.id);
-                    if (rec) {
-                        totalSessions++;
-                        if (rec.status === 'presente' || rec.status === 'tardanza' || rec.status === 'sustituto') {
-                            attendedSessions++;
-                        }
-                    }
-                });
-
-                const percent = totalSessions > 0 ? Math.round((attendedSessions / totalSessions) * 100) : 100;
-                const isAdmin = window.userMode === 'admin';
-
-                const card = document.createElement('div');
-                card.className = "bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between";
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-extrabold text-base sm:text-lg flex items-center justify-center shadow-md shrink-0">
-                                    ${acolyte.name.charAt(0).toUpperCase()}
-                                </div>
-                                <div class="min-w-0">
-                                    <h3 class="font-extrabold text-slate-900 text-sm sm:text-base truncate">${acolyte.name}</h3>
-                                    <p class="text-[11px] sm:text-xs text-slate-400 truncate"><i class="fa-solid fa-church text-amber-500 mr-1"></i> Acólito activo</p>
-                                </div>
-                            </div>
-                            ${isAdmin ? `
-                            <button onclick="deleteAcolyte('${acolyte.id}')" class="text-slate-300 hover:text-rose-600 transition p-1 text-sm shrink-0" title="Borrar acólito">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                            ` : ''}
-                        </div>
-
-                        <div class="my-3 sm:my-4 bg-slate-50 border border-slate-100 p-3 rounded-2xl flex items-center justify-between">
-                            <span class="text-[11px] sm:text-xs font-bold text-slate-600">Asistencia Acumulada</span>
-                            <span class="text-sm sm:text-base font-extrabold ${percent >= 80 ? 'text-emerald-600' : percent >= 60 ? 'text-amber-600' : 'text-rose-600'}">${percent}%</span>
-                        </div>
-                    </div>
-
-                    <button onclick="openProfileModal('${acolyte.id}')" class="w-full mt-2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold rounded-xl transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-user-gear"></i>
-                        <span>Ver Perfil & Evaluaciones</span>
-                    </button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        window.renderHistory = function() {
-            const container = document.getElementById('history-container');
-            container.innerHTML = '';
-
-            if (window.savedSessions.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-10 sm:py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-4">
-                        <i class="fa-solid fa-folder-open text-2xl sm:text-3xl text-slate-300 mb-2"></i>
-                        <p class="text-xs sm:text-sm font-bold text-slate-600">Aún no hay registros guardados.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const isAdmin = window.userMode === 'admin';
-
-            window.savedSessions.forEach(session => {
-                const item = document.createElement('div');
-                item.className = "bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 space-y-3";
-
-                const recordsHtml = session.records.map(r => {
-                    const acolyteRef = window.acolytes.find(a => a.id === r.acolyteId);
-                    const displayName = acolyteRef ? acolyteRef.name : (r.name && r.name !== 'Acólito' ? r.name : 'Acólito');
-
-                    let badgeClass = "bg-emerald-100 text-emerald-800 border-emerald-200";
-                    if (r.status === 'ausente') badgeClass = "bg-rose-100 text-rose-800 border-rose-200";
-                    if (r.status === 'permiso') badgeClass = "bg-amber-100 text-amber-800 border-emerald-200";
-                    if (r.status === 'tardanza') badgeClass = "bg-blue-100 text-blue-800 border-blue-200";
-                    if (r.status === 'sustituto') badgeClass = "bg-purple-100 text-purple-800 border-purple-200";
-
-                    return `
-                        <div class="flex flex-col sm:flex-row justify-between sm:items-center py-2 border-b border-slate-200/60 last:border-0 text-xs gap-1">
-                            <span class="font-bold text-slate-800 truncate">${displayName}</span>
-                            <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded-md border uppercase font-extrabold text-[10px] ${badgeClass}">
-                                    ${r.status} ${r.status === 'sustituto' && r.substituteName ? `(${r.substituteName})` : ''}
-                                </span>
-                                ${r.note ? `<span class="text-slate-500 italic truncate max-w-[150px] sm:max-w-xs">"${r.note}"</span>` : ''}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                const timeStr = session.time ? ` • ${session.time}` : '';
-                const massStr = session.massName ? ` (${session.massName})` : '';
-
-                item.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-slate-200 pb-3">
-                        <div>
-                            <h4 class="font-bold text-slate-900 text-xs sm:text-sm">Servicio del ${session.date}${timeStr}${massStr}</h4>
-                            <p class="text-[11px] sm:text-xs text-slate-500">${session.records.length} ${session.records.length === 1 ? 'acólito registrado' : 'acólitos registrados'}</p>
-                        </div>
-                        ${isAdmin ? `
-                        <button onclick="deleteHistorySession('${session.id}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold transition flex items-center gap-1" title="Eliminar registro">
-                            <i class="fa-solid fa-trash-can"></i>
-                            <span class="hidden sm:inline">Eliminar</span>
-                        </button>
-                        ` : ''}
-                    </div>
-                    <div class="space-y-1">
-                        ${recordsHtml}
-                    </div>
-                `;
-
-                container.appendChild(item);
-            });
-        }
-
-        window.deleteHistorySession = async function(sessionId) {
-            if (window.userMode !== 'admin') return;
-            if (confirm("¿Estás seguro de eliminar este registro histórico?")) {
-                window.savedSessions = window.savedSessions.filter(s => s.id !== sessionId);
-                await saveCloudData();
-                renderHistory();
-                renderAcolytesGrid();
-                showToast("Registro eliminado", "info");
-            }
-        }
-
-        window.downloadComprehensiveReport = function() {
-            let reportHtml = `
-                <!DOCTYPE html>
-                <html lang="es">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Reporte General y Estadísticas de Acólitos</title>
-                    <style>
-                        body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1e293b; padding: 40px; margin: 0; line-height: 1.6; background-color: #ffffff; }
-                        .header-box { border-bottom: 3px solid #f59e0b; padding-bottom: 15px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
-                        h1 { font-size: 26px; color: #0f172a; margin: 0 0 5px 0; font-weight: 800; }
-                        p.subtitle { color: #64748b; font-size: 13px; margin: 0; }
-                        h2 { font-size: 18px; color: #1e3a8a; margin-top: 35px; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; font-weight: 700; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background-color: #ffffff; }
-                        th, td { border: 1px solid #cbd5e1; padding: 10px 14px; text-align: left; font-size: 12px; }
-                        th { background-color: #f8fafc; color: #0f172a; font-weight: bold; }
-                        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-                        .good { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-                        .bad { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-                        .session-card { margin-bottom: 25px; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; background-color: #f8fafc; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-                        .footer { margin-top: 50px; font-size: 11px; text-align: center; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header-box">
-                        <div>
-                            <h1>Reporte General de Acólitos</h1>
-                            <p class="subtitle">Control de Asistencia, Perfiles y Comportamiento</p>
-                        </div>
-                        <div style="text-align: right; font-size: 12px; color: #64748b;">
-                            Fecha de Emisión: <strong>${new Date().toLocaleDateString()}</strong>
-                        </div>
-                    </div>
-
-                    <h2>1. Perfiles, Estadísticas y Evaluaciones</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 35%;">Nombre del Acólito</th>
-                                <th style="width: 25%;">Asistencia Acumulada</th>
-                                <th style="width: 40%;">Evaluaciones Recientes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            window.acolytes.forEach(acolyte => {
-                let totalSessions = 0;
-                let attendedSessions = 0;
-
-                window.savedSessions.forEach(session => {
-                    const rec = session.records.find(r => r.acolyteId === acolyte.id);
-                    if (rec) {
-                        totalSessions++;
-                        if (rec.status === 'presente' || rec.status === 'tardanza' || rec.status === 'sustituto') {
-                            attendedSessions++;
-                        }
-                    }
-                });
-
-                const percent = totalSessions > 0 ? Math.round((attendedSessions / totalSessions) * 100) : 100;
-                
-                let evalsSummary = '<span style="color: #94a3b8; font-style: italic;">Sin evaluaciones</span>';
-                if (acolyte.evaluations && acolyte.evaluations.length > 0) {
-                    evalsSummary = acolyte.evaluations.map(e => `<strong>[${e.date}]</strong> ${e.subOption}: ${e.reason}`).join('<br>');
-                }
-
-                reportHtml += `
-                    <tr>
-                        <td><strong>${acolyte.name}</strong></td>
-                        <td><strong>${percent}%</strong> (${attendedSessions}/${totalSessions} misas)</td>
-                        <td style="font-size: 11px;">${evalsSummary}</td>
-                    </tr>
-                `;
-            });
-
-            reportHtml += `
-                        </tbody>
-                    </table>
-
-                    <h2>2. Detalle Histórico de Servicios (${window.savedSessions.length} Misas Registradas)</h2>
-            `;
-
-            if (window.savedSessions.length === 0) {
-                reportHtml += `<p style="font-size: 13px; color: #64748b; font-style: italic; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">No hay servicios guardados actualmente.</p>`;
-            } else {
-                window.savedSessions.forEach(session => {
-                    reportHtml += `
-                        <div class="session-card">
-                            <h3 style="margin: 0 0 12px 0; font-size: 15px; color: #0f172a; border-bottom: 2px solid #cbd5e1; padding-bottom: 6px;">
-                                📅 Servicio: ${session.date} ${session.time ? '• ⏰ ' + session.time : ''} ${session.massName ? '• ⛪ ' + session.massName : ''}
-                            </h3>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 35%;">Acólito</th>
-                                        <th style="width: 25%;">Estado de Asistencia</th>
-                                        <th style="width: 40%;">Observación Específica</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-
-                    session.records.forEach(r => {
-                        const acolyteRef = window.acolytes.find(a => a.id === r.acolyteId);
-                        const displayName = acolyteRef ? acolyteRef.name : r.name;
-                        let statusClass = 'good';
-                        if (r.status === 'ausente') statusClass = 'bad';
-                        reportHtml += `
-                            <tr>
-                                <td><strong>${displayName}</strong></td>
-                                <td><span class="badge ${statusClass}">${r.status} ${r.status === 'sustituto' && r.substituteName ? '(' + r.substituteName + ')' : ''}</span></td>
-                                <td>${r.note || '<span style="color: #cbd5e1;">-</span>'}</td>
-                            </tr>
-                        `;
-                    });
-
-                    reportHtml += `
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                });
-            }
-
-            reportHtml += `
-                    <div class="footer">
-                        Sistema de Gestión de Acólitos • Reporte Oficial
-                    </div>
-                </body>
-                </html>
-            `;
-
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(reportHtml);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-            }, 500);
-
-            showToast("Reporte listo para Guardar en PDF", "success");
-        }
-
-        window.saveLocalData = function() {
-            localStorage.setItem('acolytes_data', JSON.stringify(window.acolytes));
-            localStorage.setItem('saved_sessions_data', JSON.stringify(window.savedSessions));
-        }
-
-        window.loadLocalData = function() {
-            const loadedAcolytes = localStorage.getItem('acolytes_data');
-            const loadedSessions = localStorage.getItem('saved_sessions_data');
-
-            if (loadedAcolytes) {
-                try { 
-                    const parsed = JSON.parse(loadedAcolytes);
-                    if (parsed && parsed.length > 0) {
-                        window.acolytes = parsed;
-                    } else {
-                        window.acolytes = DEFAULT_ACOLYTES;
-                    }
-                } catch(e){
-                    window.acolytes = DEFAULT_ACOLYTES;
-                }
-            } else {
-                window.acolytes = DEFAULT_ACOLYTES;
-                window.activeDayAcolytes = DEFAULT_ACOLYTES.map(a => a.id);
-            }
-
-            if (loadedSessions) {
-                try { window.savedSessions = JSON.parse(loadedSessions); } catch(e){}
-            }
-        }
-
-        window.showToast = function(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            if (!container) return;
-            const toast = document.createElement('div');
-
-            let bgColor = "bg-slate-900 text-white";
-            if (type === 'success') bgColor = "bg-emerald-600 text-white";
-            if (type === 'error') bgColor = "bg-rose-600 text-white";
-
-            toast.className = `${bgColor} px-4 py-3 rounded-2xl shadow-xl text-xs font-bold flex items-center gap-2 transition-all duration-300 transform translate-y-2 pointer-events-auto`;
-            toast.innerHTML = `
-                <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info'} text-sm shrink-0"></i>
-                <span class="truncate">${message}</span>
-            `;
-
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-4');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('session-date').value = today;
-            document.getElementById('visitor-date-picker').value = today;
-
-            setUserMode('visitor');
-            initCloudSync();
+            renderGrid();
+            cargarDesdeSupabase();
         });
+
+        // --- 3. RENDERING UI ---
+        function renderGrid() {
+            const grid = document.getElementById('grid-acolitos');
+            grid.innerHTML = '';
+
+            acolitosData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col justify-between space-y-3 shadow-md hover:border-slate-600 transition";
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <span class="font-bold text-slate-100">${item.id}. ${item.nombre}</span>
+                        <button onclick="openModal(${item.id})" class="text-slate-400 hover:text-amber-400 text-xs transition">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                    </div>
+                    ${item.notas ? `<p class="text-xs text-amber-300/80 italic bg-slate-900/50 p-2 rounded border border-amber-500/10"><i class="fa-regular fa-note-sticky mr-1"></i>${item.notas}</p>` : ''}
+                    <div class="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded-lg border border-slate-700/50">
+                        <button onclick="setEstado(${item.id}, 'presente')" class="py-1 text-xs font-semibold rounded ${item.estado === 'presente' ? 'bg-emerald-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'}">
+                            Presente
+                        </button>
+                        <button onclick="setEstado(${item.id}, 'permiso')" class="py-1 text-xs font-semibold rounded ${item.estado === 'permiso' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'}">
+                            Permiso
+                        </button>
+                        <button onclick="setEstado(${item.id}, 'ausente')" class="py-1 text-xs font-semibold rounded ${item.estado === 'ausente' ? 'bg-rose-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'}">
+                            Ausente
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setEstado(id, estado) {
+            const target = acolitosData.find(a => a.id === id);
+            if (target) {
+                target.estado = estado;
+                saveLocal();
+                renderGrid();
+            }
+        }
+
+        // --- 4. ACCIONES Y SUPABASE ---
+        async function guardarAsistencia() {
+            const fecha = new Date().toISOString().split('T')[0];
+            const nuevosRegistros = acolitosData.map(a => ({
+                fecha: fecha,
+                acolito_id: a.id,
+                nombre: a.nombre,
+                estado: a.estado,
+                notas: a.notas || ''
+            }));
+
+            // Actualizar arreglo local
+            historicoData.unshift(...nuevosRegistros);
+            saveLocal();
+            renderHistorico();
+
+            // Sincronizar con Supabase si está disponible
+            if (supabase) {
+                updateBadge('Sincronizando...', 'bg-amber-500/20 text-amber-400 border-amber-500/30');
+                try {
+                    const { error } = await supabase.from('historial_asistencias').insert(nuevosRegistros);
+                    if (error) throw error;
+                    updateBadge('Sincronizado', 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30');
+                    alert("¡Asistencia del día guardada correctamente!");
+                } catch (err) {
+                    console.warn("Supabase no configurado o falló, guardado localmente:", err.message);
+                    updateBadge('Modo Local', 'bg-slate-700 text-slate-300 border-slate-600');
+                    alert("Registros guardados correctamente en este dispositivo.");
+                }
+            } else {
+                alert("Registros guardados en el almacenamiento local de tu dispositivo.");
+            }
+        }
+
+        async function cargarDesdeSupabase() {
+            if (!supabase) return;
+            try {
+                const { data, error } = await supabase.from('historial_asistencias').select('*').order('created_at', { ascending: false }).limit(100);
+                if (error) throw error;
+                if (data && data.length > 0) {
+                    historicoData = data;
+                    saveLocal();
+                }
+            } catch (err) {
+                console.log("No se pudo cargar desde la nube, utilizando respaldo local.");
+            }
+        }
+
+        function saveLocal() {
+            localStorage.setItem('acolitos_local', JSON.stringify(acolitosData));
+            localStorage.setItem('historico_local', JSON.stringify(historicoData));
+        }
+
+        function updateBadge(text, classes) {
+            const badge = document.getElementById('status-badge');
+            badge.className = `px-3 py-1 rounded-full text-xs font-semibold border ${classes}`;
+            badge.innerHTML = `<i class="fa-solid fa-wifi mr-1"></i> ${text}`;
+        }
+
+        // --- 5. VISTAS Y MODAL ---
+        function switchTab(tab) {
+            const viewAsis = document.getElementById('view-asistencia');
+            const viewHist = document.getElementById('view-historico');
+            const btnAsis = document.getElementById('tab-asistencia');
+            const btnHist = document.getElementById('tab-historico');
+
+            if (tab === 'asistencia') {
+                viewAsis.classList.remove('hidden');
+                viewHist.classList.add('hidden');
+                btnAsis.className = "py-2 px-4 font-medium text-sm rounded-t-lg bg-amber-500 text-slate-950 flex items-center gap-2";
+                btnHist.className = "py-2 px-4 font-medium text-sm rounded-t-lg bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center gap-2";
+            } else {
+                viewAsis.classList.add('hidden');
+                viewHist.classList.remove('hidden');
+                btnHist.className = "py-2 px-4 font-medium text-sm rounded-t-lg bg-amber-500 text-slate-950 flex items-center gap-2";
+                btnAsis.className = "py-2 px-4 font-medium text-sm rounded-t-lg bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center gap-2";
+                renderHistorico();
+            }
+        }
+
+        function renderHistorico() {
+            const tbody = document.getElementById('tabla-historico');
+            tbody.innerHTML = '';
+            if (historicoData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500 italic">No hay registros guardados aún.</td></tr>`;
+                return;
+            }
+            historicoData.slice(0, 50).forEach(reg => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-mono text-xs text-slate-400">${reg.fecha || 'Hoy'}</td>
+                    <td class="p-3 font-medium text-slate-200">${reg.nombre}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-xs font-semibold ${reg.estado === 'presente' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : reg.estado === 'permiso' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}">
+                            ${reg.estado}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openModal(id) {
+            const item = acolitosData.find(a => a.id === id);
+            if (!item) return;
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('edit-name').value = item.nombre;
+            document.getElementById('edit-notes').value = item.notas || '';
+            document.getElementById('modal-edit').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-edit').classList.add('hidden');
+        }
+
+        function guardarCambiosModal() {
+            const id = parseInt(document.getElementById('edit-id').value);
+            const notes = document.getElementById('edit-notes').value;
+            const target = acolitosData.find(a => a.id === id);
+            if (target) {
+                target.notas = notes;
+                saveLocal();
+                renderGrid();
+            }
+            closeModal();
+        }
     </script>
 </body>
 </html>
