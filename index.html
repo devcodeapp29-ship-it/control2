@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control y Gestión de Acólitos (Supabase Cloud)</title>
+    <title>Control y Gestión de Acólitos (Supabase Cloud Sync)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -36,7 +36,7 @@
                                 Gestión de Acólitos
                             </h1>
                             <span id="cloud-status-badge" class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-cloud text-[9px]"></i> Sistema en Línea
+                                <i class="fa-solid fa-cloud text-[9px]"></i> Sincronizando en la Nube...
                             </span>
                         </div>
                     </div>
@@ -51,7 +51,7 @@
                 <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end overflow-x-auto pb-1 sm:pb-0 custom-scrollbar">
                     <button onclick="manualSaveData()" class="admin-only hidden px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold transition items-center gap-1.5 shadow-md shrink-0 flex">
                         <i class="fa-solid fa-cloud-arrow-up"></i>
-                        <span>Guardar Cambios</span>
+                        <span>Guardar en Nube</span>
                     </button>
 
                     <button id="exit-admin-btn" onclick="setUserMode('visitor')" class="admin-only hidden px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition items-center gap-1.5 shadow-md shrink-0">
@@ -95,7 +95,7 @@
                             Programación del Día y Misa Servida
                         </h2>
                         <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 admin-only">Configura la fecha, escribe la misa u horario y selecciona únicamente a los acólitos asignados para hoy.</p>
-                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 visitor-only hidden">Fecha del servicio de asistencia consultado en tiempo real.</p>
+                        <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 visitor-only hidden">Fecha del servicio de asistencia consultado en tiempo real desde la nube.</p>
                     </div>
                     <div class="admin-only flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         <button onclick="openAddAcolytesToSessionModal()" class="flex-1 sm:flex-none px-3.5 sm:px-4 py-2 sm:py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition flex items-center justify-center gap-2">
@@ -165,8 +165,8 @@
                 <!-- Save Session Button -->
                 <div class="admin-only mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-100 flex justify-end">
                     <button onclick="saveAttendanceSession()" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold rounded-2xl shadow-lg hover:shadow-amber-500/25 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base">
-                        <i class="fa-solid fa-floppy-disk text-base sm:text-lg"></i>
-                        <span>Guardar Registro</span>
+                        <i class="fa-solid fa-cloud-arrow-up text-base sm:text-lg"></i>
+                        <span>Guardar Registro en Nube</span>
                     </button>
                 </div>
             </div>
@@ -196,7 +196,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Histórico de Servicios</h2>
-                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Consulta todos los registros guardados y genera reportes ejecutivos en PDF.</p>
+                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Consulta todos los registros guardados en la nube y genera reportes ejecutivos en PDF.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     <button onclick="downloadComprehensiveReport()" class="flex-1 sm:flex-none px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs sm:text-sm font-extrabold shadow-md transition flex items-center justify-center gap-2">
@@ -479,6 +479,7 @@
             if (!supabaseClient) return;
 
             try {
+                // Sincronizar Acólitos desde Supabase
                 const { data: resAcolitos, error: errAcolitos } = await supabaseClient.from('acolitos').select('*');
                 if (!errAcolitos && resAcolitos && resAcolitos.length > 0) {
                     window.acolytes = resAcolitos.map(item => ({
@@ -488,6 +489,7 @@
                     }));
                 }
 
+                // Sincronizar Historial de Asistencias desde Supabase
                 const { data: resHistorial, error: errHistorial } = await supabaseClient.from('historial_asistencias').select('*');
                 if (!errHistorial && resHistorial && resHistorial.length > 0) {
                     window.savedSessions = resHistorial.map(item => ({
@@ -500,19 +502,31 @@
                 }
 
                 saveLocalData();
-                document.getElementById('cloud-status-badge').innerHTML = `<i class="fa-solid fa-cloud text-[9px]"></i> Sincronizado en Supabase`;
+                document.getElementById('cloud-status-badge').innerHTML = `<i class="fa-solid fa-cloud text-[9px]"></i> Sincronizado en la Nube`;
                 renderAll();
             } catch (err) {
-                console.warn("Error con Supabase:", err);
+                console.warn("Error conectando con Supabase:", err);
+                document.getElementById('cloud-status-badge').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Modo Local (Sin Conexión)`;
             }
         }
 
+        // GUARDAR DATOS EN SUPABASE Y LOCALSTORAGE
         window.saveCloudData = async function() {
             saveLocalData();
+
             if (!supabaseClient) return;
 
             try {
-                // Sincronizar historial de asistencias
+                // Actualizar o insertar acólitos en la nube
+                for (const acolyte of window.acolytes) {
+                    await supabaseClient.from('acolitos').upsert({
+                        id: acolyte.id,
+                        nombre: acolyte.name,
+                        evaluaciones: acolyte.evaluations
+                    });
+                }
+
+                // Sincronizar el historial de asistencias en la nube
                 for (const session of window.savedSessions) {
                     await supabaseClient.from('historial_asistencias').upsert({
                         id: session.id,
@@ -520,26 +534,17 @@
                         hora: session.time,
                         misa: session.massName,
                         asistencias_json: session.records
-                    }, { onConflict: 'id' });
+                    });
                 }
-
-                // Sincronizar catálogo de acólitos
-                for (const acolyte of window.acolytes) {
-                    await supabaseClient.from('acolitos').upsert({
-                        id: acolyte.id,
-                        nombre: acolyte.name,
-                        evaluaciones: acolyte.evaluations
-                    }, { onConflict: 'id' });
-                }
-            } catch (err) {
-                console.warn("Error al guardar en Supabase:", err);
+            } catch (e) {
+                console.warn("No se pudo sincronizar en la nube automáticamente:", e);
             }
         }
 
         window.manualSaveData = async function() {
             saveLocalData();
             await saveCloudData();
-            showToast("¡Cambios guardados con éxito en la nube!", "success");
+            showToast("¡Cambios guardados y sincronizados en la nube!", "success");
         }
 
         window.promptAdminAccess = function() {
@@ -560,6 +565,7 @@
             const pass = document.getElementById('admin-pass-input').value;
             if (pass === 'Monaguillos') {
                 closeAdminAuthModal();
+                localStorage.setItem("acolytes_isAdmin", "true");
                 setUserMode('admin');
             } else {
                 showToast("Contraseña incorrecta", "error");
@@ -578,6 +584,7 @@
                 document.querySelectorAll('.visitor-only').forEach(el => el.classList.add('hidden'));
                 showToast("Modo Administrador activado", "info");
             } else {
+                localStorage.removeItem("acolytes_isAdmin");
                 if (exitAdminBtn) exitAdminBtn.classList.add('hidden');
                 if (exitAdminBtnMobile) exitAdminBtnMobile.classList.add('hidden');
                 document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
@@ -936,7 +943,7 @@
             renderHistory();
             renderAcolytesGrid();
 
-            showToast("¡Registro guardado exitosamente!", "success");
+            showToast("¡Registro guardado y sincronizado en la nube!", "success");
         }
 
         window.openAddAcolytesToSessionModal = function() {
@@ -1013,7 +1020,7 @@
             closeAddAcolyteModal();
             renderAcolytesGrid();
             renderActiveAcolytesList();
-            showToast(`¡Acólito ${name} agregado!`, "success");
+            showToast(`¡Acólito ${name} agregado y sincronizado!`, "success");
         }
 
         // FUNCIONES DE EDICIÓN DE PERFIL
@@ -1047,7 +1054,7 @@
                 renderAcolytesGrid();
                 renderActiveAcolytesList();
                 renderHistory();
-                showToast("Nombre actualizado con éxito", "success");
+                showToast("Nombre actualizado en la nube", "success");
             }
         }
 
@@ -1056,9 +1063,15 @@
             const acolyte = window.acolytes.find(a => a.id === id);
             if (!acolyte) return;
 
+            if (!confirm(`¿Deseas eliminar a ${acolyte.name}?`)) return;
+
             window.acolytes = window.acolytes.filter(a => a.id !== id);
             window.activeDayAcolytes = window.activeDayAcolytes.filter(aId => aId !== id);
             delete window.currentStatuses[id];
+
+            if (supabaseClient) {
+                await supabaseClient.from('acolitos').delete().eq('id', id);
+            }
 
             await saveCloudData();
             renderAcolytesGrid();
@@ -1113,7 +1126,7 @@
                 await saveCloudData();
                 openProfileModal(window.currentSelectedProfileId);
                 renderAcolytesGrid();
-                showToast("Evaluación guardada con éxito", "success");
+                showToast("Evaluación guardada y sincronizada", "success");
 
                 window.selectedBehaviorCategory = null;
                 window.selectedBehaviorSubOption = null;
@@ -1325,6 +1338,11 @@
             if (window.userMode !== 'admin') return;
             if (confirm("¿Estás seguro de eliminar este registro histórico?")) {
                 window.savedSessions = window.savedSessions.filter(s => s.id !== sessionId);
+
+                if (supabaseClient) {
+                    await supabaseClient.from('historial_asistencias').delete().eq('id', sessionId);
+                }
+
                 await saveCloudData();
                 renderHistory();
                 renderAcolytesGrid();
@@ -1533,7 +1551,12 @@
             document.getElementById('session-date').value = today;
             document.getElementById('visitor-date-picker').value = today;
 
-            setUserMode('visitor');
+            if (localStorage.getItem("acolytes_isAdmin") === "true") {
+                setUserMode('admin');
+            } else {
+                setUserMode('visitor');
+            }
+
             initCloudSync();
         });
     </script>
